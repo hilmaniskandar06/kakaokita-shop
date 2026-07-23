@@ -47,7 +47,7 @@ export default function ProductCard({ product }) {
       to={`/produk/${product.id}`}
       className="group flex flex-col bg-white border border-cream-300 rounded-xl overflow-hidden hover:border-gold-500 transition-colors"
     >
-      <div className="relative h-40 flex items-center justify-center bg-cream-200">
+      <div className="relative h-32 sm:h-40 flex items-center justify-center bg-cream-200">
         {discount && (
           <span className="absolute top-3 left-3 bg-rose-500 text-white text-[11px] font-bold px-2 py-1 rounded-md">
             -{discount}%
@@ -68,25 +68,26 @@ export default function ProductCard({ product }) {
         <ProductThumb product={product} size={72} />
       </div>
 
-      <div className="flex flex-col gap-1.5 p-4 flex-1">
-        <span className="text-[11px] uppercase tracking-wide text-gold-600 font-semibold">{product.category}</span>
-        <h3 className="font-bold text-sm text-cacao-900 leading-snug">{product.name}</h3>
-        <p className="text-xs text-cacao-600 line-clamp-2">{product.shortDesc}</p>
+      <div className="flex flex-col gap-1 sm:gap-1.5 p-3 sm:p-4 flex-1">
+        <span className="hidden sm:block text-[11px] uppercase tracking-wide text-gold-600 font-semibold">{product.category}</span>
+        <h3 className="font-bold text-xs sm:text-sm text-cacao-900 leading-snug line-clamp-2">{product.name}</h3>
+        <p className="hidden sm:block text-xs text-cacao-600 line-clamp-2">{product.shortDesc}</p>
         <RatingStars rating={productAvgRating} reviews={productReviewCount} />
 
-        <div className="flex items-end justify-between mt-auto pt-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-auto pt-2 sm:pt-3 gap-2 sm:gap-0">
           <div className="flex flex-col">
             {product.oldPrice && (
-              <span className="text-xs text-cacao-500 line-through font-mono">{fmt(product.oldPrice)}</span>
+              <span className="text-[10px] sm:text-xs text-cacao-500 line-through font-mono">{fmt(product.oldPrice)}</span>
             )}
-            <span className="font-mono font-bold text-cacao-900">{fmt(product.price)}</span>
+            <span className="font-mono font-bold text-sm sm:text-base text-cacao-900">{fmt(product.price)}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
             <button
               onClick={handleAdd}
               disabled={!product.inStock}
               aria-label="Tambah ke keranjang"
-              className="w-9 h-9 rounded-full bg-white border border-cream-300 text-cacao-800 flex items-center justify-center hover:border-gold-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Tambah ke Keranjang"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border border-cream-300 text-cacao-800 flex items-center justify-center hover:border-gold-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Plus size={16} />
             </button>
@@ -95,9 +96,9 @@ export default function ProductCard({ product }) {
               disabled={!product.inStock}
               aria-label="Beli sekarang"
               title="Beli Sekarang"
-              className="w-9 h-9 rounded-full bg-cacao-800 text-white flex items-center justify-center hover:bg-cacao-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-cacao-800 text-white flex items-center justify-center hover:bg-cacao-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <Zap size={15} className="fill-current" />
+              <Zap size={14} className="fill-current" />
             </button>
           </div>
         </div>
