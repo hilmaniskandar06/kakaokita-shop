@@ -6,13 +6,17 @@ import { useProducts } from '../context/ProductsContext'
 import { useCategories } from '../context/CategoriesContext'
 import { useSiteContent } from '../context/SiteContentContext'
 import { useToast } from '../context/ToastContext'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 
 export default function Home() {
   const { products, loading } = useProducts()
   const { categories } = useCategories()
   const { content } = useSiteContent()
-  const featured = products.filter((p) => p.rating >= 4.7).slice(0, 8)
+  
+  const featured = useMemo(() => {
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 4)
+  }, [products])
+
   const onSale = products.filter((p) => p.oldPrice)
   const { addToast } = useToast()
   if (loading) {
@@ -41,35 +45,59 @@ export default function Home() {
             <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight text-white">
               {content.heroTitle}
             </h1>
-            <p className="text-cream-50 mt-5 max-w-md leading-relaxed text-lg">
-              {content.heroSubtitle}
-            </p>
             <div className="flex gap-3 mt-8">
               <Link to="/toko" className="bg-gold-500 text-cacao-900 font-bold px-8 py-3.5 rounded-full flex items-center gap-2 hover:bg-gold-400 transition-colors">
                 Belanja Sekarang <ArrowRight size={16} />
               </Link>
             </div>
           </div>
+          <div className="hidden lg:grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4 mt-8">
+              <img src="https://images.unsplash.com/photo-1614088685112-0a760b71a3c8?auto=format&fit=crop&q=80&w=400" className="rounded-2xl rounded-tr-[4rem] h-48 object-cover w-full" alt="Cokelat" />
+              <img src="https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400" className="rounded-2xl rounded-bl-[4rem] h-64 object-cover w-full" alt="Biji Kakao" />
+            </div>
+            <div className="flex flex-col gap-4">
+              <img src="https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&q=80&w=400" className="rounded-2xl h-64 object-cover w-full" alt="Praline" />
+              <div className="bg-gold-500 rounded-2xl rounded-br-[4rem] p-6 flex flex-col justify-center h-48">
+                <span className="text-4xl font-black text-cacao-900">100%</span>
+                <span className="text-cacao-800 font-bold leading-tight mt-1">Kakao Lokal<br/>Pilihan</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="max-w-7xl mx-auto px-5 lg:px-8 py-10 grid sm:grid-cols-3 gap-6">
-        {[
-          { icon: Leaf, title: 'Tanpa Pengawet', desc: 'Bahan alami, diproses dalam batch kecil.' },
-          { icon: Truck, title: 'Pengiriman Cepat', desc: 'Dikirim ke seluruh Indonesia 1-3 hari.' },
-          { icon: ShieldCheck, title: 'Kualitas Terjamin', desc: 'Setiap batch melalui uji rasa ketat.' },
-        ].map(({ icon: Icon, title, desc }) => (
-          <div key={title} className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center shrink-0">
-              <Icon size={18} className="text-cacao-800" />
+      {/* Value Props */}
+      <section className="bg-cream-200 border-b border-cream-300">
+        <div className="max-w-7xl mx-auto px-5 lg:px-8 py-8 grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-cream-300">
+          <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-6 first:pl-0 first:pt-0">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-cacao-900 shadow-sm shrink-0">
+              <Leaf size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-sm">{title}</h4>
-              <p className="text-xs text-cacao-600 mt-1">{desc}</p>
+              <h4 className="font-bold text-cacao-900">Bahan Alami</h4>
+              <p className="text-xs text-cacao-600 mt-0.5">Tanpa pengawet buatan</p>
             </div>
           </div>
-        ))}
+          <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-6">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-cacao-900 shadow-sm shrink-0">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-cacao-900">Kualitas Premium</h4>
+              <p className="text-xs text-cacao-600 mt-0.5">Standar artisan cokelat</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:px-6">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-cacao-900 shadow-sm shrink-0">
+              <Truck size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-cacao-900">Pengiriman Aman</h4>
+              <p className="text-xs text-cacao-600 mt-0.5">Bergaransi tidak leleh</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Categories */}
@@ -120,7 +148,6 @@ export default function Home() {
         <div className="flex items-end justify-between mb-6">
           <div>
             <h2 className="text-2xl font-extrabold">Produk Pilihan</h2>
-            <p className="text-sm text-cacao-600 mt-1">Rating tertinggi dari pelanggan kami.</p>
           </div>
           <Link to="/toko" className="text-sm font-semibold text-gold-600 hover:underline hidden sm:block">
             Lihat semua

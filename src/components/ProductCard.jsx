@@ -69,9 +69,13 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="flex flex-col gap-1 sm:gap-1.5 p-3 sm:p-4 flex-1">
-        <span className="hidden sm:block text-[11px] uppercase tracking-wide text-gold-600 font-semibold">{product.category}</span>
-        <h3 className="font-bold text-xs sm:text-sm text-cacao-900 leading-snug line-clamp-2">{product.name}</h3>
-        <p className="hidden sm:block text-xs text-cacao-600 line-clamp-2">{product.shortDesc}</p>
+        <div className="hidden md:block">
+          <span className="text-[11px] uppercase tracking-wide text-gold-600 font-semibold">{product.category}</span>
+        </div>
+        <h3 className="font-bold text-xs md:text-sm text-cacao-900 leading-snug line-clamp-2">{product.name}</h3>
+        <div className="hidden md:block">
+          <p className="text-xs text-cacao-600 line-clamp-2">{product.shortDesc}</p>
+        </div>
         <RatingStars rating={productAvgRating} reviews={productReviewCount} />
 
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mt-auto pt-2 sm:pt-3 gap-2 sm:gap-0">
