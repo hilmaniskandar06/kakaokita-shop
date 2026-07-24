@@ -49,23 +49,27 @@ export default function ProductCard({ product }) {
     >
       <div className="relative h-32 sm:h-40 flex items-center justify-center bg-cream-200">
         {discount && (
-          <span className="absolute top-3 left-3 bg-rose-500 text-white text-[11px] font-bold px-2 py-1 rounded-md">
+          <span className="absolute top-3 left-3 z-10 bg-rose-500 text-white text-[11px] font-bold px-2 py-1 rounded-md">
             -{discount}%
           </span>
         )}
         {!product.inStock && (
-          <span className="absolute top-3 left-3 bg-cacao-800 text-white text-[11px] font-bold px-2 py-1 rounded-md">
+          <span className="absolute top-3 left-3 z-10 bg-cacao-800 text-white text-[11px] font-bold px-2 py-1 rounded-md">
             Stok Habis
           </span>
         )}
         <button
           onClick={handleWishlist}
           aria-label="Simpan ke wishlist"
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center border border-cream-300 hover:border-rose-500 transition-colors"
+          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white flex items-center justify-center border border-cream-300 hover:border-rose-500 transition-colors"
         >
           <Heart size={15} className={wishlisted ? 'fill-rose-500 text-rose-500' : 'text-cacao-600'} />
         </button>
-        <ProductThumb product={product} size={72} />
+        <img 
+          src={product?.images?.[0] || product?.image || 'https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400'} 
+          alt={product.name} 
+          className="w-full h-full object-cover"
+        />
       </div>
 
       <div className="flex flex-col gap-1 sm:gap-1.5 p-3 sm:p-4 flex-1">

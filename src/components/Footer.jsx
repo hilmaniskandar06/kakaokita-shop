@@ -22,7 +22,7 @@ export default function Footer() {
             <span className="font-extrabold text-2xl text-white block">{content.shopName || 'KAKAO.KITA'}</span>
           )}
         </Link>
-        
+
         <p className="text-sm text-cream-300/80 leading-relaxed mb-8 max-w-md">
           {content.footerDescription}
         </p>
