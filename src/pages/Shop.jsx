@@ -116,7 +116,7 @@ export default function Shop() {
         <div>
           <button
             onClick={() => setFiltersOpen(true)}
-            className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-cacao-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-cacao-800 transition-colors"
+            className="lg:hidden fixed bottom-6 left-6 z-40 w-14 h-14 bg-cacao-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-cacao-800 transition-colors"
             aria-label="Filter"
           >
             <SlidersHorizontal size={24} />

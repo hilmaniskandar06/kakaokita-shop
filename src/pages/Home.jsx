@@ -139,7 +139,7 @@ export default function Home() {
           <div>
             <h2 className="text-2xl font-extrabold">Produk Pilihan</h2>
           </div>
-          <Link to="/toko" className="text-sm font-semibold text-gold-600 hover:underline hidden sm:block">
+          <Link to="/toko" className="text-sm font-semibold text-gold-600 hover:underline">
             Lihat semua
           </Link>
         </div>

@@ -13,9 +13,10 @@ export default function Header({ onOpenCart }) {
   const { user } = useAuth()
   const { getUserNotifications, markSingleAsRead, markAllAsRead } = useNotifications()
   const { content } = useSiteContent()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [notifOpen, setNotifOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const navigate = useNavigate()
   const notifRef = useRef(null)
 
@@ -70,7 +71,7 @@ export default function Header({ onOpenCart }) {
 
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setMenuOpen((v) => !v)}
+              onClick={() => setSearchOpen((v) => !v)}
               aria-label="Cari"
               className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
             >
@@ -148,7 +149,7 @@ export default function Header({ onOpenCart }) {
                 <Link
                   to="/wishlist"
                   aria-label="Wishlist"
-                  className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+                  className="hidden md:flex relative w-10 h-10 rounded-full items-center justify-center hover:bg-cream-200 transition-colors"
                 >
                   <Heart size={19} />
                   {wishlistItems.length > 0 && (
@@ -160,7 +161,7 @@ export default function Header({ onOpenCart }) {
                 <button
                   onClick={onOpenCart}
                   aria-label="Keranjang belanja"
-                  className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+                  className="hidden md:flex relative w-10 h-10 rounded-full items-center justify-center hover:bg-cream-200 transition-colors"
                 >
                   <ShoppingBag size={19} />
                   {totalCount > 0 && (
@@ -190,26 +191,58 @@ export default function Header({ onOpenCart }) {
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"
-              className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200"
+              className="sm:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200"
             >
               {menuOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
           </div>
         </div>
       </div>
-
-      {menuOpen && (
-        <div className="lg:hidden border-t border-cream-300 px-5 py-4 flex flex-col gap-3">
+      {searchOpen && (
+        <div className="md:hidden px-5 py-3 border-t border-cream-300 bg-cream-100">
           <form onSubmit={handleSearch} className="flex items-center relative">
-            <Search size={16} className="absolute left-3 text-cacao-500" />
+            <Search size={16} className="absolute left-8 text-cacao-500" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               type="search"
               placeholder="Cari cokelat..."
-              className="w-full bg-cream-200 rounded-full pl-9 pr-3 py-2 text-sm outline-none"
+              className="w-full bg-white rounded-full pl-9 pr-3 py-2 text-sm outline-none border border-cream-300 focus:border-gold-500"
+              autoFocus
             />
           </form>
+        </div>
+      )}
+
+      {user && (
+        <div className="md:hidden fixed bottom-[90px] right-6 flex flex-col gap-3 z-40">
+          <Link
+            to="/wishlist"
+            className="w-12 h-12 bg-white text-rose-500 rounded-full shadow-xl flex items-center justify-center relative border border-cream-200"
+          >
+            <Heart size={20} />
+            {wishlistItems.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                {wishlistItems.length}
+              </span>
+            )}
+          </Link>
+          <button
+            onClick={onOpenCart}
+            className="w-12 h-12 bg-gold-500 text-cacao-900 rounded-full shadow-xl flex items-center justify-center relative"
+          >
+            <ShoppingBag size={20} />
+            {totalCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-cacao-900 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-gold-500">
+                {totalCount}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {menuOpen && (
+        <div className="sm:hidden border-t border-cream-300 px-5 py-4 flex flex-col gap-3">
           {user ? (
             <>
 

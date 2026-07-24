@@ -95,6 +95,14 @@ export default function Invoice() {
                     {order.paymentStatus === 'menunggu_pembayaran' ? 'Belum Lunas' : 'Lunas / Diterima'}
                   </td>
                 </tr>
+                {order.resi && (
+                  <tr>
+                    <td className="pr-4 py-1">No. Resi:</td>
+                    <td className="font-semibold text-gray-800 font-mono tracking-wide">
+                      {order.resi}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

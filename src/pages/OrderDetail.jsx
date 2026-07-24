@@ -44,13 +44,15 @@ export default function OrderDetail() {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono font-bold bg-cream-200 px-3 py-1.5 rounded-full text-sm">{order.id}</span>
-          <Link
-            to={`/invoice/${order.id}`}
-            target="_blank"
-            className="flex items-center gap-2 bg-white border border-cream-300 text-cacao-700 hover:text-cacao-900 hover:bg-cream-50 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
-          >
-            <Printer size={16} /> Cetak Invoice
-          </Link>
+          {order.resi && (
+            <Link
+              to={`/invoice/${order.id}`}
+              target="_blank"
+              className="flex items-center gap-2 bg-white border border-cream-300 text-cacao-700 hover:text-cacao-900 hover:bg-cream-50 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+            >
+              <Printer size={16} /> Cetak Invoice
+            </Link>
+          )}
         </div>
       </div>
 
