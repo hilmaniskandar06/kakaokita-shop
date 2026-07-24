@@ -9,7 +9,8 @@ function mapFromDb(dbItem) {
     inStock: dbItem.in_stock,
     contentVolume: dbItem.content_volume,
     isNew: dbItem.is_new,
-    shortDesc: dbItem.short_desc
+    shortDesc: dbItem.short_desc,
+    longDesc: dbItem.description
   }
 }
 
@@ -27,7 +28,7 @@ function mapToDb(item) {
     content_volume: item.contentVolume,
     is_new: item.isNew,
     short_desc: item.shortDesc,
-    description: item.description,
+    description: item.longDesc || item.description,
     images: item.images || []
   }
 }

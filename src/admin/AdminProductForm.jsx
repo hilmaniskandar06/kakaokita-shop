@@ -17,7 +17,7 @@ const emptyForm = {
   inStock: true,
   images: [],
   shortDesc: '',
-  description: '',
+  longDesc: '',
   weight: '',
   contentVolume: '',
 }
@@ -183,8 +183,8 @@ export default function AdminProductForm() {
             <label className="block text-xs font-medium text-cacao-600 mb-1.5">Deskripsi Lengkap</label>
             <textarea
               rows={4}
-              value={form.description}
-              onChange={(e) => update('description', e.target.value)}
+              value={form.longDesc}
+              onChange={(e) => update('longDesc', e.target.value)}
               required
               className="w-full bg-cream-100 border border-cream-300 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-gold-500"
             />
