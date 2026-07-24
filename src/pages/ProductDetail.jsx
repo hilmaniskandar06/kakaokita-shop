@@ -25,15 +25,15 @@ export default function ProductDetail() {
   const navigate = useNavigate()
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })
 
+  const featured = useMemo(() => {
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 4)
+  }, [products])
+
   if (loading) {
     return <div className="max-w-7xl mx-auto px-5 py-24 text-center text-cacao-500">Memuat produk...</div>
   }
   if (!product) return <Navigate to="/toko" replace />
 
-  const related = getRelated(product)
-  const featured = useMemo(() => {
-    return [...products].sort(() => 0.5 - Math.random()).slice(0, 4)
-  }, [products])
   const wishlisted = isWishlisted(product.id)
 
   function handleAdd() {
