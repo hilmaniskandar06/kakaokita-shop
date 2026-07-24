@@ -1,8 +1,4 @@
-// siteContentService.js — mengelola teks-teks utama situs (hero, footer, newsletter)
-// agar bisa diubah dari halaman admin tanpa mengedit kode.
-
-const STORAGE_KEY = 'kk_site_content'
-const DELAY = 100
+import { supabase } from '../config/supabase'
 
 export const DEFAULT_CONTENT = {
   heroEyebrow: '100% Kakao Asli Nusantara',
@@ -29,27 +25,42 @@ export const DEFAULT_CONTENT = {
   pageCookie: '<p>Kebijakan penggunaan cookie.</p>',
 }
 
-function delay(v) {
-  return new Promise((resolve) => setTimeout(() => resolve(v), DELAY))
-}
-
-function read() {
+export async function getContent() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return { ...DEFAULT_CONTENT, ...JSON.parse(raw) }
-  } catch {
-    // ignore
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('data')
+      .eq('id', 1)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Failed to fetch site settings:', error)
+      return DEFAULT_CONTENT
+    }
+
+    if (data && data.data) {
+      return { ...DEFAULT_CONTENT, ...data.data }
+    }
+  } catch (err) {
+    console.error(err)
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CONTENT))
   return DEFAULT_CONTENT
 }
 
-export async function getContent() {
-  return delay(read())
+export async function updateContent(partial) {
+  try {
+    const current = await getContent()
+    const next = { ...current, ...partial }
+
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert({ id: 1, data: next })
+
+    if (error) throw new Error(error.message)
+    return next
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
 }
 
-export async function updateContent(partial) {
-  const next = { ...read(), ...partial }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  return delay(next)
-}
