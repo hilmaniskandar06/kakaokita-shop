@@ -44,7 +44,7 @@ export default function OrderDetail() {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono font-bold bg-cream-200 px-3 py-1.5 rounded-full text-sm">{order.id}</span>
-          {order.resi && (
+          {order.trackingNumber && (
             <Link
               to={`/invoice/${order.id}`}
               target="_blank"
