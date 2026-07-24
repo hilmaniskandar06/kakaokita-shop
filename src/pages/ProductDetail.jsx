@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { Minus, Plus, Heart, Truck, ShieldCheck, Zap, ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import ProductThumb from '../components/ProductThumb'
@@ -13,7 +13,7 @@ const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
 export default function ProductDetail() {
   const { id } = useParams()
-  const { getById, getRelated, loading } = useProducts()
+  const { products, getById, getRelated, loading } = useProducts()
   const product = getById(id)
   const [qty, setQty] = useState(1)
   const [tab, setTab] = useState('desc')
@@ -31,6 +31,9 @@ export default function ProductDetail() {
   if (!product) return <Navigate to="/toko" replace />
 
   const related = getRelated(product)
+  const featured = useMemo(() => {
+    return [...products].sort(() => 0.5 - Math.random()).slice(0, 4)
+  }, [products])
   const wishlisted = isWishlisted(product.id)
 
   function handleAdd() {
@@ -294,11 +297,16 @@ export default function ProductDetail() {
         )}
       </div>
 
-      {related.length > 0 && (
+      {featured.length > 0 && (
         <div className="mt-14">
-          <h2 className="text-xl font-extrabold mb-6">Produk Terkait</h2>
+          <div className="flex items-end justify-between mb-6">
+            <h2 className="text-xl font-extrabold">Produk Pilihan</h2>
+            <Link to="/toko" className="text-sm font-semibold text-gold-600 hover:underline">
+              Lihat semua
+            </Link>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
       )}
