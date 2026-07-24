@@ -33,10 +33,23 @@ export default function AdminContent() {
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
-    const payload = { ...form }
-    if ('shippingFee' in payload) payload.shippingFee = Number(payload.shippingFee)
-    if ('serviceFee' in payload) payload.serviceFee = Number(payload.serviceFee)
     try {
+      const payload = { ...form }
+      if ('shippingFee' in payload) payload.shippingFee = Number(payload.shippingFee)
+      if ('serviceFee' in payload) payload.serviceFee = Number(payload.serviceFee)
+
+      // Upload media
+      const { uploadImage } = await import('../services/storageService')
+      
+      if (payload.heroMedia && payload.heroMedia.startsWith('data:')) {
+        const ext = payload.heroMediaType === 'video' ? 'mp4' : 'jpg'
+        payload.heroMedia = await uploadImage(payload.heroMedia, `site-hero-${Date.now()}.${ext}`, 'public')
+      }
+      
+      if (payload.shopLogo && payload.shopLogo.startsWith('data:')) {
+        payload.shopLogo = await uploadImage(payload.shopLogo, `site-logo-${Date.now()}.jpg`, 'public')
+      }
+
       await updateContent(payload)
       addToast('Konten situs diperbarui')
     } catch (err) {
@@ -52,10 +65,13 @@ export default function AdminContent() {
   async function handleFileChange(e) {
     const file = e.target.files[0]
     if (!file) return
-    if (file.size > 2 * 1024 * 1024) return addToast('Ukuran maksimal 2MB', 'error')
-    
-    // Automatically set type based on file type
     const isVideo = file.type.startsWith('video/')
+    const maxSize = isVideo ? 20 * 1024 * 1024 : 2 * 1024 * 1024 // 20MB for video, 2MB for image
+    
+    if (file.size > maxSize) {
+      return addToast(`Ukuran maksimal ${isVideo ? '20MB' : '2MB'}`, 'error')
+    }
+    
     setForm(s => ({ ...s, heroMediaType: isVideo ? 'video' : 'image' }))
 
     if (isVideo) {

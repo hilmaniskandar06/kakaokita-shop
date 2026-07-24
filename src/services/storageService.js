@@ -5,10 +5,13 @@ export async function uploadImage(dataUrl, path, bucketName = 'public') {
   const res = await fetch(dataUrl)
   const blob = await res.blob()
 
+  return uploadFile(blob, path, bucketName)
+}
+
+export async function uploadFile(fileOrBlob, path, bucketName = 'public') {
   const { data, error } = await supabase.storage
     .from(bucketName)
-    .upload(path, blob, {
-      contentType: 'image/jpeg',
+    .upload(path, fileOrBlob, {
       upsert: true
     })
 
