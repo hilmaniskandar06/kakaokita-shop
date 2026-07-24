@@ -45,23 +45,13 @@ export default function Home() {
             <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight text-white">
               {content.heroTitle}
             </h1>
+            <p className="text-cream-50 mt-5 max-w-md leading-relaxed text-lg">
+              {content.heroSubtitle}
+            </p>
             <div className="flex gap-3 mt-8">
               <Link to="/toko" className="bg-gold-500 text-cacao-900 font-bold px-8 py-3.5 rounded-full flex items-center gap-2 hover:bg-gold-400 transition-colors">
                 Belanja Sekarang <ArrowRight size={16} />
               </Link>
-            </div>
-          </div>
-          <div className="hidden lg:grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-4 mt-8">
-              <img src="https://images.unsplash.com/photo-1614088685112-0a760b71a3c8?auto=format&fit=crop&q=80&w=400" className="rounded-2xl rounded-tr-[4rem] h-48 object-cover w-full" alt="Cokelat" />
-              <img src="https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400" className="rounded-2xl rounded-bl-[4rem] h-64 object-cover w-full" alt="Biji Kakao" />
-            </div>
-            <div className="flex flex-col gap-4">
-              <img src="https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&q=80&w=400" className="rounded-2xl h-64 object-cover w-full" alt="Praline" />
-              <div className="bg-gold-500 rounded-2xl rounded-br-[4rem] p-6 flex flex-col justify-center h-48">
-                <span className="text-4xl font-black text-cacao-900">100%</span>
-                <span className="text-cacao-800 font-bold leading-tight mt-1">Kakao Lokal<br/>Pilihan</span>
-              </div>
             </div>
           </div>
         </div>
