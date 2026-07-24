@@ -1,93 +1,113 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useToast } from './ToastContext'
+import { supabase } from '../config/supabase'
 
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
   const { addToast } = useToast()
 
   useEffect(() => {
-    const savedSession = sessionStorage.getItem('kk_auth_session')
-    if (savedSession) {
-      setUser(JSON.parse(savedSession))
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        fetchProfile(session.user)
+      } else {
+        setUser(null)
+        setLoading(false)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        fetchProfile(session.user)
+      } else {
+        setUser(null)
+        setLoading(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  function login(email, password) {
-    const users = JSON.parse(localStorage.getItem('kk_users') || '[]')
-    const found = users.find(u => u.email === email && u.password === password)
-    if (found) {
-      if (found.deletedAt) {
-        return { success: false, error: 'Akun telah dihapus.' }
-      }
-      const userData = { ...found }
-      delete userData.password // don't keep password in session
-      setUser(userData)
-      sessionStorage.setItem('kk_auth_session', JSON.stringify(userData))
-      return { success: true }
+  async function fetchProfile(authUser) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single()
+      
+    if (data) {
+      setUser({ ...data, email: authUser.email })
+    } else {
+      setUser({ id: authUser.id, email: authUser.email })
     }
-    return { success: false, error: 'Email atau password salah' }
+    setLoading(false)
   }
 
-  function register(data) {
-    const users = JSON.parse(localStorage.getItem('kk_users') || '[]')
-    if (users.find(u => u.email === data.email)) {
-      return { success: false, error: 'Email tersebut sudah ada, gunakan email lain' }
+  async function login(email, password) {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      return { success: false, error: 'Email atau password salah' }
     }
-    
-    const newUser = {
-      id: 'USR-' + Date.now(),
-      ...data,
-      joinedAt: new Date().toISOString(),
-      address: data.address || {}
-    }
-    
-    users.push(newUser)
-    localStorage.setItem('kk_users', JSON.stringify(users))
-    
     return { success: true }
   }
 
-  function logout() {
-    setUser(null)
-    sessionStorage.removeItem('kk_auth_session')
+  async function register(data) {
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          full_name: data.name
+        }
+      }
+    })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    // Jika butuh menyimpan data ekstra
+    if (authData.user && (data.phone || data.address)) {
+      await supabase.from('profiles').update({
+        phone: data.phone,
+        address: data.address
+      }).eq('id', authData.user.id)
+    }
+
+    return { success: true }
   }
 
-  function updateProfile(updates) {
+  async function logout() {
+    await supabase.auth.signOut()
+    setUser(null)
+  }
+
+  async function updateProfile(updates) {
     if (!user) return
-    const users = JSON.parse(localStorage.getItem('kk_users') || '[]')
-    const updatedUsers = users.map(u => {
-      if (u.id === user.id) {
-        return { ...u, ...updates }
-      }
-      return u
-    })
-    localStorage.setItem('kk_users', JSON.stringify(updatedUsers))
-    
-    const updatedUser = { ...user, ...updates }
-    setUser(updatedUser)
-    sessionStorage.setItem('kk_auth_session', JSON.stringify(updatedUser))
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+
+    if (error) {
+      addToast('Gagal memperbarui profil: ' + error.message, 'error')
+      return
+    }
+
+    setUser(prev => ({ ...prev, ...updates }))
     addToast('Profil berhasil diperbarui')
   }
 
-  function deleteAccount(id) {
-    const users = JSON.parse(localStorage.getItem('kk_users') || '[]')
-    const updatedUsers = users.map(u => {
-      if (u.id === id) {
-        return { ...u, deletedAt: new Date().toISOString() }
-      }
-      return u
-    })
-    localStorage.setItem('kk_users', JSON.stringify(updatedUsers))
-    if (user && user.id === id) {
-      logout()
-    }
+  async function deleteAccount(id) {
+    addToast('Silakan hubungi admin untuk menghapus akun', 'error')
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, deleteAccount }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, deleteAccount, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   )
 }

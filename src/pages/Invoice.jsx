@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { Printer, ChevronLeft } from 'lucide-react'
 import { useSiteContent } from '../context/SiteContentContext'
+import * as orderService from '../services/orderService'
 
 export default function Invoice() {
   const { id } = useParams()
@@ -9,8 +10,12 @@ export default function Invoice() {
   const { content } = useSiteContent()
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    setOrder(saved.find((o) => o.id === id) || null)
+    orderService.getOrderById(id).then(o => {
+      setOrder(o)
+    }).catch(err => {
+      console.error(err)
+      setOrder(null)
+    })
   }, [id])
 
   if (order === undefined) {
@@ -92,7 +97,7 @@ export default function Invoice() {
                 <tr>
                   <td className="pr-4 py-1">Status Pembayaran:</td>
                   <td className="font-semibold text-gray-800 capitalize">
-                    {order.paymentStatus === 'menunggu_pembayaran' ? 'Belum Lunas' : 'Lunas / Diterima'}
+                    {order.paymentStatus === 'menunggu_pembayaran' || order.status === 'belum_dibayar' ? 'Belum Lunas' : 'Lunas / Diterima'}
                   </td>
                 </tr>
                 {order.trackingNumber && (

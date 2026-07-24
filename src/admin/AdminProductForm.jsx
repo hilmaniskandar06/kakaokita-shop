@@ -86,12 +86,28 @@ export default function AdminProductForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
-    const payload = {
-      ...form,
-      price: Number(form.price),
-      oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
-    }
     try {
+      // 1. Upload new images
+      const finalImages = []
+      for (let i = 0; i < form.images.length; i++) {
+        const img = form.images[i]
+        if (img.startsWith('data:')) {
+          const { uploadImage } = await import('../services/storageService')
+          const fileName = `${Date.now()}-${i}.jpg`
+          const publicUrl = await uploadImage(img, fileName)
+          finalImages.push(publicUrl)
+        } else {
+          finalImages.push(img)
+        }
+      }
+
+      const payload = {
+        ...form,
+        images: finalImages,
+        price: Number(form.price),
+        oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
+      }
+      
       if (isEdit) {
         await editProduct(id, payload)
         addToast('Produk berhasil diperbarui')

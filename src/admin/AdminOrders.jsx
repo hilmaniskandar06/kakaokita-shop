@@ -4,6 +4,7 @@ import AdminShell from './AdminShell'
 import { useToast } from '../context/ToastContext'
 import { useNotifications } from '../context/NotificationContext'
 import OrderSummaryCard from '../components/OrderSummaryCard'
+import * as orderService from '../services/orderService'
 
 const STATUS_LABELS = {
   belum_dibayar: { label: 'Belum Dibayar', class: 'bg-cacao-100 text-cacao-700' },
@@ -32,9 +33,14 @@ export default function AdminOrders() {
     loadOrders()
   }, [])
 
-  function loadOrders() {
-    const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    setOrders(saved)
+  async function loadOrders() {
+    try {
+      const data = await orderService.getAllOrders()
+      setOrders(data)
+    } catch (err) {
+      console.error(err)
+      addToast('Gagal memuat pesanan')
+    }
   }
 
   function updateStatus(id, newStatus) {
@@ -49,26 +55,29 @@ export default function AdminOrders() {
     commitStatusUpdate(id, newStatus)
   }
 
-  function commitStatusUpdate(id, newStatus, extraData = {}) {
-    const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    const updated = saved.map(o => o.id === id ? { ...o, paymentStatus: newStatus, ...extraData } : o)
-    localStorage.setItem('kk_orders', JSON.stringify(updated))
-    setOrders(updated)
-    addToast(`Status pesanan diperbarui menjadi ${STATUS_LABELS[newStatus].label}`)
-    
-    // Send Notification
-    const order = saved.find(o => o.id === id)
-    if (order && order.userId) {
-      if (newStatus === 'dikirim') {
-        addNotification(order.userId, 'Pesanan Dikirim', `Pesanan ${id} Anda sedang dalam perjalanan. No. Resi: ${extraData.trackingNumber}`, `/pesanan/${id}`)
-      } else if (newStatus === 'dibatalkan') {
-        addNotification(order.userId, 'Pesanan Dibatalkan', `Pesanan ${id} dibatalkan. Alasan: ${extraData.cancelReason}`, `/pesanan/${id}`)
-      } else if (newStatus === 'diproses') {
-        addNotification(order.userId, 'Pesanan Diproses', `Hore! Pembayaran pesanan ${id} telah dikonfirmasi dan sedang diproses.`, `/pesanan/${id}`)
+  async function commitStatusUpdate(id, newStatus, extraData = {}) {
+    try {
+      await orderService.updateOrderStatus(id, newStatus, extraData)
+      setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus, ...extraData } : o))
+      addToast(`Status pesanan diperbarui menjadi ${STATUS_LABELS[newStatus]?.label || newStatus}`)
+      
+      // Send Notification
+      const order = orders.find(o => o.id === id)
+      if (order && order.userId) {
+        if (newStatus === 'dikirim') {
+          addNotification(order.userId, 'Pesanan Dikirim', `Pesanan ${id} Anda sedang dalam perjalanan. No. Resi: ${extraData.trackingNumber}`, `/pesanan/${id}`)
+        } else if (newStatus === 'dibatalkan') {
+          addNotification(order.userId, 'Pesanan Dibatalkan', `Pesanan ${id} dibatalkan. Alasan: ${extraData.cancelReason}`, `/pesanan/${id}`)
+        } else if (newStatus === 'diproses') {
+          addNotification(order.userId, 'Pesanan Diproses', `Hore! Pembayaran pesanan ${id} telah dikonfirmasi dan sedang diproses.`, `/pesanan/${id}`)
+        }
       }
+      
+      setStatusPrompt(null)
+    } catch (err) {
+      console.error(err)
+      addToast('Gagal memperbarui status')
     }
-    
-    setStatusPrompt(null)
   }
 
   function handlePromptSubmit(e) {
@@ -83,13 +92,16 @@ export default function AdminOrders() {
     }
   }
 
-  function deleteOrder(id) {
+  async function deleteOrder(id) {
     if (confirm('Hapus pesanan ini secara permanen?')) {
-      const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-      const filtered = saved.filter(o => o.id !== id)
-      localStorage.setItem('kk_orders', JSON.stringify(filtered))
-      setOrders(filtered)
-      addToast('Pesanan dihapus')
+      try {
+        await orderService.deleteOrder(id)
+        setOrders(orders.filter(o => o.id !== id))
+        addToast('Pesanan dihapus')
+      } catch (err) {
+        console.error(err)
+        addToast('Gagal menghapus pesanan')
+      }
     }
   }
 
@@ -108,8 +120,8 @@ export default function AdminOrders() {
           </thead>
           <tbody>
             {orders.map(o => {
-              const status = o.paymentStatus || 'belum_dibayar'
-              const statusData = STATUS_LABELS[status]
+              const status = o.status || 'belum_dibayar'
+              const statusData = STATUS_LABELS[status] || STATUS_LABELS['belum_dibayar']
               
               return (
                 <tr key={o.id} className="border-t border-cream-200">

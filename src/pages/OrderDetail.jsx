@@ -3,6 +3,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { ChevronLeft, Printer } from 'lucide-react'
 import OrderSummaryCard from '../components/OrderSummaryCard'
 import { useToast } from '../context/ToastContext'
+import * as orderService from '../services/orderService'
 
 export default function OrderDetail() {
   const { id } = useParams()
@@ -10,8 +11,12 @@ export default function OrderDetail() {
   const { addToast } = useToast()
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    setOrder(saved.find((o) => o.id === id) || null)
+    orderService.getOrderById(id).then(o => {
+      setOrder(o)
+    }).catch(err => {
+      console.error(err)
+      setOrder(null)
+    })
   }, [id])
 
   if (order === undefined) {
@@ -19,13 +24,15 @@ export default function OrderDetail() {
   }
   if (order === null) return <Navigate to="/pesanan" replace />
 
-  function handleSelesai() {
+  async function handleSelesai() {
     if (confirm('Apakah Anda yakin pesanan ini sudah diterima dengan baik?')) {
-      const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-      const updated = saved.map((o) => (o.id === id ? { ...o, paymentStatus: 'selesai' } : o))
-      localStorage.setItem('kk_orders', JSON.stringify(updated))
-      setOrder(updated.find(o => o.id === id))
-      addToast('Pesanan berhasil diselesaikan!')
+      try {
+        const updated = await orderService.updateOrderStatus(id, 'selesai')
+        setOrder(updated)
+        addToast('Pesanan berhasil diselesaikan!')
+      } catch (err) {
+        addToast('Gagal menyelesaikan pesanan: ' + err.message)
+      }
     }
   }
 
@@ -58,7 +65,7 @@ export default function OrderDetail() {
 
       <OrderSummaryCard order={order} />
 
-      {order.paymentStatus === 'dikirim' && (
+      {order.status === 'dikirim' && (
         <div className="mt-6 flex justify-end">
           <button onClick={handleSelesai} className="bg-ok-500 hover:bg-ok-600 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm">
             Pesanan Diterima / Selesai

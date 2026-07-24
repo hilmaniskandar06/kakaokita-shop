@@ -1,11 +1,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useProducts } from './ProductsContext'
+import { useAuth } from './AuthContext'
+import { supabase } from '../config/supabase'
 
 const WishlistContext = createContext(null)
 const STORAGE_KEY = 'kk_wishlist'
 
 export function WishlistProvider({ children }) {
   const { getById } = useProducts()
+  const { user } = useAuth()
   const [ids, setIds] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -15,17 +18,24 @@ export function WishlistProvider({ children }) {
     }
   })
 
+  // Sinkronisasi data dari server saat login
+  useEffect(() => {
+    if (user) {
+      supabase.from('wishlists').select('items').eq('user_id', user.id).maybeSingle().then(({ data, error }) => {
+        if (!error && data && data.items) {
+          setIds(data.items)
+        }
+      })
+    }
+  }, [user])
+
+  // Simpan perubahan baik ke lokal maupun server
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ids))
-  }, [ids])
-
-  useEffect(() => {
-    // Prune invalid IDs
-    const validIds = ids.filter(id => !!getById(id))
-    if (validIds.length !== ids.length) {
-      setIds(validIds)
+    if (user) {
+      supabase.from('wishlists').upsert({ user_id: user.id, items: ids }).then()
     }
-  }, [])
+  }, [ids, user])
 
   function toggle(id) {
     setIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))

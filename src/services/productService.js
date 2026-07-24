@@ -1,70 +1,76 @@
-// productService.js — versi SEDERHANA (localStorage, tanpa server).
-//
-// Semua fungsi di sini sengaja dibuat `async` dan punya nama serta bentuk
-// argumen yang SAMA dengan versi Supabase di `productService.supabase.example.js`.
-// Tujuannya: kalau nanti pindah ke database sungguhan, kamu cukup mengganti
-// isi file ini — tidak perlu mengubah halaman/komponen lain sama sekali,
-// karena semua halaman hanya bicara lewat ProductsContext, bukan ke sini langsung.
-//
-// Lihat README bagian "Migrasi ke Supabase" untuk langkah lengkapnya.
-
+import { supabase } from '../config/supabase'
 import { SEED_PRODUCTS } from '../data/products'
 
-const STORAGE_KEY = 'kk_products'
-const SIMULATED_DELAY = 150 // ms — meniru jeda jaringan agar UI loading terasa wajar
-
-function delay(value) {
-  return new Promise((resolve) => setTimeout(() => resolve(value), SIMULATED_DELAY))
-}
-
-function readAll() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {
-    // localStorage rusak/tidak tersedia — jatuh ke seed
+function mapFromDb(dbItem) {
+  if (!dbItem) return null
+  return {
+    ...dbItem,
+    oldPrice: dbItem.old_price,
+    inStock: dbItem.in_stock,
+    contentVolume: dbItem.content_volume,
+    isNew: dbItem.is_new,
+    shortDesc: dbItem.short_desc
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_PRODUCTS))
-  return SEED_PRODUCTS
 }
 
-function writeAll(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+function mapToDb(item) {
+  return {
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    old_price: item.oldPrice,
+    rating: item.rating,
+    reviews: item.reviews,
+    category: item.category,
+    weight: item.weight,
+    in_stock: item.inStock,
+    content_volume: item.contentVolume,
+    is_new: item.isNew,
+    short_desc: item.shortDesc,
+    description: item.description,
+    images: item.images || []
+  }
 }
 
 export async function listProducts() {
-  return delay(readAll())
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
+  if (error) {
+    console.error('Error listProducts:', error)
+    return []
+  }
+  return data.map(mapFromDb)
 }
 
 export async function getProduct(id) {
-  return delay(readAll().find((p) => p.id === id) || null)
+  const { data, error } = await supabase.from('products').select('*').eq('id', id).maybeSingle()
+  if (error || !data) return null
+  return mapFromDb(data)
 }
 
 export async function createProduct(payload) {
-  const list = readAll()
   const id = payload.id || 'p' + Date.now()
-  const product = { ...payload, id }
-  writeAll([product, ...list])
-  return delay(product)
+  const dbData = mapToDb({ ...payload, id })
+  const { data, error } = await supabase.from('products').insert(dbData).select().single()
+  if (error) throw new Error(error.message)
+  return mapFromDb(data)
 }
 
 export async function updateProduct(id, payload) {
-  const list = readAll()
-  const idx = list.findIndex((p) => p.id === id)
-  if (idx === -1) throw new Error('Produk tidak ditemukan')
-  const updated = { ...list[idx], ...payload, id }
-  list[idx] = updated
-  writeAll(list)
-  return delay(updated)
+  const dbData = mapToDb({ ...payload, id })
+  const { data, error } = await supabase.from('products').update(dbData).eq('id', id).select().single()
+  if (error) throw new Error(error.message)
+  return mapFromDb(data)
 }
 
 export async function deleteProduct(id) {
-  writeAll(readAll().filter((p) => p.id !== id))
-  return delay(true)
+  const { error } = await supabase.from('products').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+  return true
 }
 
-// Khusus versi sederhana: kembalikan data ke kondisi awal (tidak ada di versi Supabase).
 export async function resetProducts() {
-  writeAll(SEED_PRODUCTS)
-  return delay(SEED_PRODUCTS)
+  const dbItems = SEED_PRODUCTS.map(mapToDb)
+  const { error } = await supabase.from('products').upsert(dbItems)
+  if (error) throw new Error(error.message)
+  return SEED_PRODUCTS
 }

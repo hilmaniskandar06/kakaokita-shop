@@ -1,11 +1,15 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useProducts } from './ProductsContext'
+import { useAuth } from './AuthContext'
+import { supabase } from '../config/supabase'
 
 const CartContext = createContext(null)
 const STORAGE_KEY = 'kk_cart'
 
 export function CartProvider({ children }) {
   const { getById } = useProducts()
+  const { user } = useAuth()
+  
   const [items, setItems] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -15,9 +19,26 @@ export function CartProvider({ children }) {
     }
   })
 
+  // Sinkronisasi data dari server saat login
+  useEffect(() => {
+    if (user) {
+      supabase.from('carts').select('items').eq('user_id', user.id).maybeSingle().then(({ data, error }) => {
+        if (!error && data && data.items) {
+          // Gabungkan jika ada item lokal yang belum masuk cloud, 
+          // tapi cara termudah adalah menimpa data lokal dengan data server
+          setItems(data.items)
+        }
+      })
+    }
+  }, [user])
+
+  // Simpan perubahan baik ke lokal maupun server
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }, [items])
+    if (user) {
+      supabase.from('carts').upsert({ user_id: user.id, items }).then()
+    }
+  }, [items, user])
 
   function addItem(id, qty = 1) {
     setItems((prev) => ({ ...prev, [id]: (prev[id] || 0) + qty }))

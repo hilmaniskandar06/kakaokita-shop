@@ -12,6 +12,7 @@ import { useLeaveConfirmation } from '../hooks/useLeaveConfirmation'
 import { useSiteContent } from '../context/SiteContentContext'
 import { useAuth } from '../context/AuthContext'
 import * as geo from '../services/geoService'
+import * as orderService from '../services/orderService'
 import { Copy } from 'lucide-react'
 
 const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
@@ -233,9 +234,17 @@ export default function Checkout() {
       incrementVoucherUsage(activeVoucher.voucher.id)
     }
 
-    const saved = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    saved.unshift(order)
-    localStorage.setItem('kk_orders', JSON.stringify(saved))
+    try {
+      await orderService.createOrder({
+        ...order,
+        status: 'diproses', // Status default
+        paymentStatus: 'menunggu_pembayaran'
+      })
+    } catch (err) {
+      addToast('Gagal membuat pesanan: ' + err.message)
+      setSaving(false)
+      return
+    }
 
     if (user && form.saveToProfile) {
       const savedUsers = JSON.parse(localStorage.getItem('kk_users') || '[]')

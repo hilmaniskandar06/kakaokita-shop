@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Receipt, ChevronRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import * as orderService from '../services/orderService'
 
 const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
@@ -16,13 +17,28 @@ const STATUS_LABELS = {
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
   const { user } = useAuth()
 
   useEffect(() => {
-    const all = JSON.parse(localStorage.getItem('kk_orders') || '[]')
-    const filtered = all.filter(o => user ? o.userId === user.id : !o.userId)
-    setOrders(filtered)
+    if (user) {
+      orderService.getOrdersByUser(user.id)
+        .then(data => {
+          setOrders(data)
+          setLoading(false)
+        })
+        .catch(err => {
+          console.error(err)
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
   }, [user])
+
+  if (loading) {
+    return <div className="py-24 text-center text-cacao-500">Memuat riwayat pesanan...</div>
+  }
 
   if (orders.length === 0) {
     return (
@@ -41,33 +57,37 @@ export default function OrderHistory() {
     <div className="max-w-4xl mx-auto px-5 lg:px-8 py-10">
       <h1 className="text-2xl font-extrabold mb-8">Riwayat Pesanan</h1>
       <div className="flex flex-col gap-4">
-        {orders.map((o) => (
-          <Link
-            key={o.id}
-            to={`/pesanan/${o.id}`}
-            className="bg-white border border-cream-300 rounded-xl p-5 hover:border-gold-500 transition-colors flex items-center gap-4"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-                <span className="font-mono font-bold">{o.id}</span>
-                <span className="text-xs text-cacao-500">{new Date(o.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        {orders.map((o) => {
+          const status = o.status || 'belum_dibayar'
+          const statusData = STATUS_LABELS[status] || STATUS_LABELS['belum_dibayar']
+          return (
+            <Link
+              key={o.id}
+              to={`/pesanan/${o.id}`}
+              className="bg-white border border-cream-300 rounded-xl p-5 hover:border-gold-500 transition-colors flex items-center gap-4"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                  <span className="font-mono font-bold">{o.id}</span>
+                  <span className="text-xs text-cacao-500">{new Date(o.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                </div>
+                <div className="text-sm text-cacao-700 mb-3 truncate">
+                  {o.items.map((i) => i.name + ' ×' + i.qty).join(', ')}
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-cacao-600">
+                    {typeof o.customer?.payment === 'object' ? o.customer.payment.name : o.customer?.payment}
+                  </span>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${statusData.class}`}>
+                    {statusData.label}
+                  </span>
+                  <span className="font-mono font-bold">{fmt(o.total)}</span>
+                </div>
               </div>
-              <div className="text-sm text-cacao-700 mb-3 truncate">
-                {o.items.map((i) => i.name + ' ×' + i.qty).join(', ')}
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-cacao-600">
-                  {typeof o.customer?.payment === 'object' ? o.customer.payment.name : o.customer?.payment}
-                </span>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${STATUS_LABELS[o.paymentStatus || 'belum_dibayar'].class}`}>
-                  {STATUS_LABELS[o.paymentStatus || 'belum_dibayar'].label}
-                </span>
-                <span className="font-mono font-bold">{fmt(o.total)}</span>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-cacao-400 shrink-0" />
-          </Link>
-        ))}
+              <ChevronRight size={18} className="text-cacao-400 shrink-0" />
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
