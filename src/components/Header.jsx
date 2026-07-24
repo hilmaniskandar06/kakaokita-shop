@@ -69,6 +69,14 @@ export default function Header({ onOpenCart }) {
           </form>
 
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Cari"
+              className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+            >
+              <Search size={19} />
+            </button>
+
             {user ? (
               <>
                 <Link
@@ -136,39 +144,49 @@ export default function Header({ onOpenCart }) {
                     </div>
                   )}
                 </div>
+
+                <Link
+                  to="/wishlist"
+                  aria-label="Wishlist"
+                  className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+                >
+                  <Heart size={19} />
+                  {wishlistItems.length > 0 && (
+                    <span className="absolute top-0.5 right-0.5 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {wishlistItems.length}
+                    </span>
+                  )}
+                </Link>
+                <button
+                  onClick={onOpenCart}
+                  aria-label="Keranjang belanja"
+                  className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+                >
+                  <ShoppingBag size={19} />
+                  {totalCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 bg-gold-500 text-cacao-900 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {totalCount}
+                    </span>
+                  )}
+                </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                className="hidden sm:flex px-4 py-2 text-sm font-bold bg-cacao-900 text-white rounded-full hover:bg-cacao-800 transition-colors"
-              >
-                Masuk
-              </Link>
+              <>
+                <Link
+                  to="/login"
+                  aria-label="Masuk"
+                  className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
+                >
+                  <UserIcon size={19} />
+                </Link>
+                <Link
+                  to="/login"
+                  className="hidden md:flex px-4 py-2 text-sm font-bold bg-cacao-900 text-white rounded-full hover:bg-cacao-800 transition-colors"
+                >
+                  Masuk
+                </Link>
+              </>
             )}
-            <Link
-              to="/wishlist"
-              aria-label="Wishlist"
-              className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
-            >
-              <Heart size={19} />
-              {wishlistItems.length > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {wishlistItems.length}
-                </span>
-              )}
-            </Link>
-            <button
-              onClick={onOpenCart}
-              aria-label="Keranjang belanja"
-              className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-cream-200 transition-colors"
-            >
-              <ShoppingBag size={19} />
-              {totalCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-gold-500 text-cacao-900 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {totalCount}
-                </span>
-              )}
-            </button>
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"

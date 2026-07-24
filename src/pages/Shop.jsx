@@ -47,6 +47,17 @@ export default function Shop() {
   const FilterPanel = (
     <div className="flex flex-col gap-7">
       <div>
+        <h4 className="font-bold text-sm mb-3">Urutkan</h4>
+        <select
+          value={sort}
+          onChange={(e) => updateParam('sort', e.target.value)}
+          className="w-full bg-cream-100 border border-cream-300 rounded-lg px-3 py-2 text-sm outline-none"
+        >
+          {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+        </select>
+      </div>
+
+      <div>
         <h4 className="font-bold text-sm mb-3">Kategori</h4>
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -91,7 +102,7 @@ export default function Shop() {
   )
 
   return (
-    <div className="max-w-7xl mx-auto px-5 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-5 lg:px-8 py-10 relative">
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold">{activeCategory || 'Semua Produk'}</h1>
         <p className="text-sm text-cacao-600 mt-1">
@@ -103,21 +114,13 @@ export default function Shop() {
         <aside className="hidden lg:block">{FilterPanel}</aside>
 
         <div>
-          <div className="flex items-center justify-between mb-5 gap-3">
-            <button
-              onClick={() => setFiltersOpen(true)}
-              className="lg:hidden flex items-center gap-2 text-sm font-semibold border border-cream-300 rounded-full px-4 py-2"
-            >
-              <SlidersHorizontal size={14} /> Filter
-            </button>
-            <select
-              value={sort}
-              onChange={(e) => updateParam('sort', e.target.value)}
-              className="ml-auto bg-white border border-cream-300 rounded-full px-4 py-2 text-sm outline-none"
-            >
-              {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-          </div>
+          <button
+            onClick={() => setFiltersOpen(true)}
+            className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-cacao-900 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-cacao-800 transition-colors"
+            aria-label="Filter"
+          >
+            <SlidersHorizontal size={24} />
+          </button>
 
           {loading ? (
             <p className="text-center py-20 text-cacao-500">Memuat produk...</p>

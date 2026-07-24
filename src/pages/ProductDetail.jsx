@@ -135,15 +135,15 @@ export default function ProductDetail() {
 
         <div>
           <span className="text-xs uppercase tracking-wide text-gold-600 font-bold">{product.category}</span>
-          <h1 className="text-3xl font-extrabold mt-2">{product.name}</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold mt-2">{product.name}</h1>
           <div className="mt-3"><RatingStars rating={avgRating} reviews={reviewCount} size={16} /></div>
 
           <div className="flex items-baseline gap-3 mt-5">
             {product.oldPrice && <span className="text-cacao-500 line-through font-mono">{fmt(product.oldPrice)}</span>}
-            <span className="text-2xl font-mono font-extrabold">{fmt(product.price)}</span>
+            <span className="text-xl md:text-2xl font-mono font-extrabold">{fmt(product.price)}</span>
           </div>
 
-          <p className="text-cacao-700 leading-relaxed mt-5 max-w-lg">{product.shortDesc}</p>
+          <p className="text-sm md:text-base text-cacao-700 leading-relaxed mt-5 max-w-lg">{product.shortDesc}</p>
 
           <div className="flex items-center gap-4 mt-4 text-sm flex-wrap">
             <span className="text-cacao-600 border-r border-cream-300 pr-4">Berat: <strong className="text-cacao-900">{product.weight}</strong></span>

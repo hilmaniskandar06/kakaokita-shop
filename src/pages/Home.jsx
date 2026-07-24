@@ -42,10 +42,10 @@ export default function Home() {
             <span className="inline-block bg-white/10 text-gold-400 text-xs font-bold uppercase tracking-wide px-3 py-1.5 rounded-full border border-gold-500/30 mb-5">
               {content.heroEyebrow}
             </span>
-            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight text-white">
+            <h1 className="text-3xl md:text-5xl font-extrabold leading-tight text-white">
               {content.heroTitle}
             </h1>
-            <p className="text-cream-50 mt-5 max-w-md leading-relaxed text-lg">
+            <p className="text-cream-50 mt-4 md:mt-5 max-w-md leading-relaxed text-base md:text-lg">
               {content.heroSubtitle}
             </p>
             <div className="flex gap-3 mt-8">
